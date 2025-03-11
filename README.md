@@ -1,15 +1,17 @@
-# SVM 語音端點偵測 (EPD) - D1009212
+# 🎙️ SVM Voice Endpoint Detection (EPD)
 
-## 1. 資料夾結構
+> [README_ZH.md](README_ZH.md)
+
+## 📁 1. Folder Structure
 ```
 hw03
-├── data                        # 資料集
-│   ├── dataset_cache.pt        # 資料集前處理後快取
+├── data                        # 📚 Dataset
+│   ├── dataset_cache.pt        # 🚀 Preprocessed dataset cache
 │   ├── waveFiles_2008
 │   └── wavefiles-all
-├── models                      # 模型輸出資料夾
-│   └── 20250309_151313         # 訓練時間戳
-│       ├── svm_model.pth       # 模型檔案
+├── models                      # 🛠️ Model outputs
+│   └── 20250309_151313         # 📅 Timestamp of training
+│       ├── svm_model.pth       # 💾 Model file
 │       ├── test.log
 │       └── train.log
 └── src
@@ -19,141 +21,59 @@ hw03
     ├── model.py
     ├── test.py
     └── train.py
-
 ```
 
+## 🛠️ 2. Preprocessing
 
-## 2. 前處理
+Files are named following `<letter>_<start sample>_<end sample>.wav`, and `wavefiles-all` is used to split data into training and testing sets with an 80/20 ratio.
 
-檔案命名規則 `<字母>_<起始 sample>_<結束 sample>.wav`，並使用 `wavefiles-all` 將獨立音檔切分 2 8 測試與訓練集比例。
-
-### 2.1. 音框 (Frame) 切割
-
-由於 SVM 需要固定大小的輸入特徵，所以先將音檔切割成固定大小的 frame。
+### ✂️ 2.1. Frame Segmentation
+Since SVM requires fixed-size inputs, audio files are segmented into fixed-size frames:
 
 ```
 frame_size = 400 samples
 hop_size = 80 samples
 ```
 
-### 2.2. 維度修改
-在 `torchaudio.load()` 讀取後，音訊資料的維度為 `(1, num_samples)`
-因為 `torchaudio.transforms.MFCC` 需要 `batch_size` 維度，所以使用 `unsqueeze(0)` 增加維度到 `(1, 1, frame_size)`
+### 📐 2.2. Dimension Adjustment
+After loading with `torchaudio.load()`, audio data initially has dimensions `(1, num_samples)`.
+Since `torchaudio.transforms.MFCC` requires a `batch_size` dimension, `unsqueeze(0)` expands it to `(1, 1, frame_size)`.
 
-### 2.3. MFCC 轉換
+### 🔄 2.3. MFCC Transformation
+Set `n_mfcc` to `13`, synchronizing with the model's `input_dims`, resulting in dimensions `(1, n_mfcc, num_frames)`.
 
-`n_mfcc` 設定為 `13`，模型的 `input_dims` 也同步設定，會輸出 `(1, n_mfcc, num_frames)`
+### 📏 2.4. Final Dimension Conversion
+Remove the `batch` dimension, leaving dimensions as `(n_mfcc, num_frames)`.
 
-### 2.4. 轉換最終維度
+## 🤖 3. SVM Model
+SVM accepts only `1D` features, so `(13, 3)` is flattened to `(39,)` for input.
 
-將 `batch` 維度去掉，最後是 `(n_mfcc, num_frames)`。
-
-
-## 3. SVM 模型
-
-因為 SVM 只接受 `1D` 特徵，所以先將 `(13, 3)` 攤平成 `(39,)` 作為輸入。
-
-使用 `nn.Linear` 模擬
+Implemented using `nn.Linear` to simulate:
 
 $$
 f(x) = Wx + b
 $$
 
-
-## 4. 損失函數 (Hinge Loss)
+## 📉 4. Loss Function (Hinge Loss)
 
 $$
-L=max(0,1−y⋅f(x))
+L = max(0, 1 - y \cdot f(x))
 $$
 
-如果 y 與 f(x) 同號 (分類正確)，Loss=0 (無懲罰)。
-如果 y 與 f(x) 不同號 (分類錯誤)，Loss 會增大，讓模型學習邊界。
+- Loss = 0 if `y` and `f(x)` have the same sign (correct classification).
+- Loss increases when `y` and `f(x)` differ (incorrect classification), guiding the model to learn the boundary.
 
-## 5. 訓練方式 SGD (Stochastic Gradient Descent)
+## 🚀 5. Training Method - SGD (Stochastic Gradient Descent)
+Use PyTorch's built-in `SGD` to train and update parameters `W` and `b`.
 
-使用 `pytorch` 內建 `SGD` 來訓練，更新 `W` 和 `b`。
+## 📈 6. Training Log
+Training details logged, including epoch and loss information, with final model stored as `svm_model.pth`.
 
-## 6. 訓練
+## 🧪 7. Testing
+Testing accuracy reached **91.87%** 🎯.
 
-```log
-2025-03-09 15:13:13 [INFO] 開始訓練...
-2025-03-09 15:13:13 [INFO] 沒有找到快取檔，開始讀取並處理每個音檔...
-2025-03-09 15:13:13 [INFO] 正在處理 0051906 的音檔
-2025-03-09 15:13:23 [INFO] 正在處理 100061607 的音檔
-2025-03-09 15:13:33 [INFO] 正在處理 100061609 的音檔
-2025-03-09 15:13:42 [INFO] 正在處理 100061610 的音檔
-2025-03-09 15:13:52 [INFO] 正在處理 100062423 的音檔
-2025-03-09 15:14:13 [INFO] 正在處理 100062466 的音檔
-2025-03-09 15:14:23 [INFO] 正在處理 100062521 的音檔
-2025-03-09 15:14:34 [INFO] 正在處理 100062543 的音檔
-2025-03-09 15:14:44 [INFO] 正在處理 100062579 的音檔
-2025-03-09 15:14:54 [INFO] 正在處理 100062590 的音檔
-2025-03-09 15:15:04 [INFO] 正在處理 100062595 的音檔
-2025-03-09 15:15:15 [INFO] 正在處理 100062649 的音檔
-2025-03-09 15:15:24 [INFO] 正在處理 100062701 的音檔
-2025-03-09 15:15:33 [INFO] 正在處理 100065423 的音檔
-2025-03-09 15:15:42 [INFO] 正在處理 100065502 的音檔
-2025-03-09 15:15:51 [INFO] 正在處理 100065504 的音檔
-2025-03-09 15:16:01 [INFO] 正在處理 100065507 的音檔
-2025-03-09 15:16:10 [INFO] 正在處理 100065517 的音檔
-2025-03-09 15:16:19 [INFO] 正在處理 9862206 的音檔
-2025-03-09 15:16:28 [INFO] 正在處理 9862222 的音檔
-2025-03-09 15:16:37 [INFO] 正在處理 9862225 的音檔
-2025-03-09 15:16:46 [INFO] 正在處理 9862373 的音檔
-2025-03-09 15:16:55 [INFO] 正在處理 D0441126 的音檔
-2025-03-09 15:17:04 [INFO] 正在處理 D0542090 的音檔
-2025-03-09 15:17:13 [INFO] 正在處理 D0542490 的音檔
-2025-03-09 15:17:22 [INFO] 正在處理 D0542562 的音檔
-2025-03-09 15:17:31 [INFO] 正在處理 D0542664 的音檔
-2025-03-09 15:17:40 [INFO] 正在處理 D0708782 的音檔
-2025-03-09 15:17:49 [INFO] 正在處理 D0776694 的音檔
-2025-03-09 15:17:58 [INFO] 正在處理 D1009212 的音檔
-2025-03-09 15:18:07 [INFO] 正在處理 D1018703 的音檔
-2025-03-09 15:18:16 [INFO] 正在處理 D1031022 的音檔
-2025-03-09 15:18:25 [INFO] 正在處理 D1049174 的音檔
-2025-03-09 15:18:35 [INFO] 正在處理 M0634194 的音檔
-2025-03-09 15:18:45 [INFO] 正在處理 M0702580 的音檔
-2025-03-09 15:18:54 [INFO] 正在處理 M0706422 的音檔
-2025-03-09 15:19:04 [INFO] 正在處理 M0706729 的音檔
-2025-03-09 15:19:13 [INFO] 正在處理 M0720792 的音檔
-2025-03-09 15:19:22 [INFO] 正在處理 M0730234 的音檔
-2025-03-09 15:19:32 [INFO] 正在處理 M0805895 的音檔
-2025-03-09 15:19:42 [INFO] 正在處理 M0807693 的音檔
-2025-03-09 15:19:52 [INFO] 正在處理 M0903507 的音檔
-2025-03-09 15:20:01 [INFO] 正在處理 M1029785 的音檔
-2025-03-09 15:20:11 [INFO] 正在處理 M1108626 的音檔
-2025-03-09 15:20:21 [INFO] 正在處理 M1205522 的音檔
-2025-03-09 15:20:30 [INFO] 正在處理 M1205596 的音檔
-2025-03-09 15:20:40 [INFO] 正在處理 M1207394 的音檔
-2025-03-09 15:20:50 [INFO] 正在處理 M1305359 的音檔
-2025-03-09 15:20:59 [INFO] 正在處理 P0900015 的音檔
-2025-03-09 15:22:05 [INFO] 已完成音檔 0.8, 0.2 分割並快取，train=1137297, test=287923
-2025-03-09 15:22:05 [INFO] 載入訓練集，共 1137297 筆
-2025-03-09 15:22:49 [INFO] Epoch 1, Loss: 5.6186
-2025-03-09 15:23:29 [INFO] Epoch 2, Loss: 5.3502
-2025-03-09 15:24:12 [INFO] Epoch 3, Loss: 5.2021
-2025-03-09 15:24:57 [INFO] Epoch 4, Loss: 5.0333
-2025-03-09 15:25:43 [INFO] Epoch 5, Loss: 4.9688
-2025-03-09 15:26:30 [INFO] Epoch 6, Loss: 4.8843
-2025-03-09 15:27:20 [INFO] Epoch 7, Loss: 4.9188
-2025-03-09 15:28:09 [INFO] Epoch 8, Loss: 4.8341
-2025-03-09 15:28:58 [INFO] Epoch 9, Loss: 4.7763
-2025-03-09 15:29:47 [INFO] Epoch 10, Loss: 4.7178
-2025-03-09 15:29:47 [INFO] 模型已儲存至 models/20250309_151313\svm_model.pth
-```
+## 📊 8. Visualization
+Interactive visualization with Gradio and Plotly allows real-time audio file uploads, analysis, segment marking, and playback.
 
-## 7. 測試
+![Visualization](./asset/image1.png)
 
-```log
-2025-03-09 15:31:40 [INFO] 開始測試...
-2025-03-09 15:31:40 [INFO] 已找到資料集快取 data/dataset_cache.pt，正在載入...
-2025-03-09 15:33:31 [INFO] 載入完成：train=1137297 筆, test=287923 筆
-2025-03-09 15:33:31 [INFO] 載入測試集，共 287923 筆
-2025-03-09 15:33:31 [INFO] 模型已載入: .\models\20250309_151313\svm_model.pth
-2025-03-09 15:33:34 [INFO] 測試集 accuracy: 91.87%
-```
-
-## 7. 視覺化
-使用 Gradio + Plotly 來顯示，可以即時上傳更換檔案分析語音片段，並標記起始與結束點，也可以播放音檔。
-
-![image](./asset/image1.png)
