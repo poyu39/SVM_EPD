@@ -9,6 +9,7 @@ from pathlib import Path
 from model import SVM_Model
 from tqdm import tqdm
 import csv
+from config import N_MFCC
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -116,7 +117,7 @@ if __name__ == "__main__":
     parser.add_argument("--score", type=bool, default=False, help="是否計算 EPD Score")
     args = parser.parse_args()
     
-    model = SVM_Model(input_dim=13).to(device)
+    model = SVM_Model(input_dim=N_MFCC).to(device)
     model.load_state_dict(torch.load(args.model, map_location=device))
     model.eval()
     
