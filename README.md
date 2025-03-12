@@ -56,8 +56,13 @@ File naming convention: `<letter>_<start_sample>_<end_sample>.wav`. The dataset 
 Since SVM requires fixed-size input features, audio files are segmented into frames of a fixed size.
 
 ```
+# 2008 dataset
 frame_size = 400 samples
 hop_size = 80 samples
+
+# ex dataset
+frame_size = 256 samples
+hop_size = 128 samples
 ```
 
 ### 📐 Dimension Adjustment

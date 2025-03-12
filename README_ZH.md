@@ -54,8 +54,13 @@ python src/epd.py --model <模型路徑>
 由於 SVM 需要固定大小的輸入特徵，需先將音檔切割成固定大小的 Frame。
 
 ```
+# 2008 dataset
 frame_size = 400 samples
 hop_size = 80 samples
+
+# ex dataset
+frame_size = 256 samples
+hop_size = 128 samples
 ```
 
 ### 📐 維度調整
