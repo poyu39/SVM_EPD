@@ -75,3 +75,9 @@ $$
 
 ![視覺化展示](./asset/image1.png)
 
+## 8. Requirements
+
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+pip install -r requirements.txt
+```
