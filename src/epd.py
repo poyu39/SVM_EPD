@@ -23,7 +23,7 @@ def detect_speech_segments(waveform, sr, frame_size=400, hop_size=160, n_mfcc=13
         hop_size (int):             frame 的移動步長
         n_mfcc (int):               MFCC 的維度
     Returns:
-        segments (List[Tuple[int, int]]): speech frame 的起始與結束時間
+        segments (List[Tuple[int, int]]): speech frame 的起始與結束 sample index
         sr (int):                         重新取樣後的取樣率
     """
     # 重新取樣到 16k
