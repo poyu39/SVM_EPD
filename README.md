@@ -7,7 +7,8 @@
 hw03
 ├── data                        # 📚 Dataset
 │   ├── dataset_cache.pt        # 🚀 Cached preprocessed dataset
-│   ├── waveFiles_2008
+│   ├── wavefiles-2008
+│   ├── wavefiles-ex
 │   └── wavefiles-all
 ├── models                      # 💻 Model output folder
 │   └── 20250309_151313         # 📅 Training timestamp
@@ -113,24 +114,21 @@ model_timestamp
 ### 🎵 Frame Label Testing
 Predictions are made based on MFCC features and labels of test frames, and accuracy is calculated.
 
-✨ [Best Model](./models/best_model/test.log) achieved an accuracy of `92.58%`.
+✨ [Best Model](./models/best_model_ex/test.log) achieved an accuracy of `95.12%`.
 
 ### 🎼 End-point Sample Testing
 Predictions are made based on the start and end samples of test audio files, and accuracy is calculated.
 
-✨ [Best Model](./models/best_model/epd_score.csv) achieved an accuracy of `82.21%`.
+✨ [Best Model](./models/best_model_ex/epd_score.csv) achieved an accuracy of `90.29%`.
 
-#### wavfiles-2008 Test Results
+#### wavfiles-ex Test Results
 ```csv
 Speaker,Correct,Total,EPD Score
-931915_yylee,57.5,72,79.86111111111111
-932008_zylee,121.5,144,84.375
-932017_zjye,189.5,216,87.73148148148148
-942027_zwxiao,236.5,288,82.11805555555556
-9565506_hyzhuang,304.0,360,84.44444444444444
-960003_Jens,361.5,432,83.68055555555556
-9662613_yhjang,369.5,504,73.31349206349206
-Average,0,0,82.2177343159486
+123456_Zhehui,70.5,72,97.91666666666666
+654321_Baiway,131.0,144,90.97222222222221
+921510_Roger,163.0,180,90.55555555555556
+921588_Leon,206.0,252,81.74603174603175
+Average,0,0,90.29761904761904
 ```
 
 ## 📈 Visualization

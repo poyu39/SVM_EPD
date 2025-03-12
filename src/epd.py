@@ -52,7 +52,8 @@ def detect_speech_segments(waveform, sr, frame_size=FRAME_SIZE, hop_size=HOP_SIZ
         if end > length:
             break
         
-        frame_starts.append(start)
+        # 以 frame 的中位數 sample index 當作代表
+        frame_starts.append(start + frame_size // 2)
         
         # 取出 frame
         frame = signal[start:end].unsqueeze(0)
