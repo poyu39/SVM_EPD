@@ -9,11 +9,11 @@ from pathlib import Path
 from model import SVM_Model
 from tqdm import tqdm
 import csv
-from config import N_MFCC
+from config import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def detect_speech_segments(waveform, sr, frame_size=400, hop_size=160, n_mfcc=13):
+def detect_speech_segments(waveform, sr, frame_size=FRAME_SIZE, hop_size=HOP_SIZE, n_mfcc=N_MFCC):
     """
     偵測語音端點，將 wav 切割成連續的 speech frame。
     
